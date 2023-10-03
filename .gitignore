@@ -1,0 +1,5 @@
+.vscode
+*.o
+nbody_barnes_hut
+nbody_brute_force
+particles.log
