@@ -11,9 +11,10 @@ do
 
     rm "$logdir/$filename"
     touch "$logdir/$filename"
-    
+    cd parallel
     make &> "/dev/null"
-
+    cd ..
+    
     for nbproc in 1 2 3 4 5 6 7 8
     do
         export OMP_NUM_THREADS=$nbproc

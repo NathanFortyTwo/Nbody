@@ -1,13 +1,13 @@
 import matplotlib.pyplot as plt
 
-
 log_files = ["brute_force","barnes_hut"]
+L = []
 
-L =[]
 for file in log_files:
     Lx = []
     Ly = []
     path = f"results/{file}.txt"
+
     with open(path,'r') as f:
         lines = f.readlines()[:-1] # remove last line
         

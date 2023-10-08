@@ -107,6 +107,8 @@ void all_move_particles(double step)
   }
 
   /* then move all particles and return statistics */
+
+#pragma omp parallel for shared(particles)
   for (i = 0; i < nparticles; i++)
   {
     move_particle(&particles[i], step);
