@@ -2,7 +2,7 @@ CC	= mpicc
 CFLAGS	= -O0 -g -Wall
 LDFLAGS = -lm -lpthread -lX11 -fopenmp
 VERBOSE	=
-TARGET	= nbody_brute_force nbody_barnes_hut sequential_nbody_barnes_hut sequential_nbody_brute_force 
+TARGET	= parallelfor_nbody_brute_force
 OBJS	= ui.o xstuff.o nbody_tools.o nbody_alloc.o
 
 DISPLAY = -DDISPLAY
@@ -19,11 +19,11 @@ sequential_nbody_brute_force: sequential_nbody_barnes_hut.o $(OBJS)
 sequential_nbody_barnes_hut: sequential_nbody_barnes_hut.o $(OBJS)
 	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
 
-nbody_brute_force: nbody_brute_force.o $(OBJS)
+parallelfor_nbody_brute_force: parallelfor_nbody_brute_force.o $(OBJS)
 	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
 
-nbody_barnes_hut: nbody_barnes_hut.o $(OBJS)
-	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
+#nbody_barnes_hut: nbody_barnes_hut.o $(OBJS)
+#	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< $(VERBOSE) $(DISPLAY) $(DUMP) -fopenmp
