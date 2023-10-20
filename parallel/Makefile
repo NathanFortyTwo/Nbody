@@ -1,8 +1,8 @@
 CC	= mpicc
-CFLAGS	= -O0 -g -Wall
-LDFLAGS = -lm -lpthread -lX11 -fopenmp
+CFLAGS	= -O0 -g -Wall -fopenmp
+LDFLAGS = -lm -lpthread -lX11 -fopenmp -g 
 VERBOSE	=
-TARGET	= parallelfor_nbody_brute_force
+TARGET	= mpi_nbody_brute_force omp_nbody_brute_force sequential_nbody_brute_force sequential_nbody_barnes_hut
 OBJS	= ui.o xstuff.o nbody_tools.o nbody_alloc.o
 
 DISPLAY = -DDISPLAY
@@ -13,19 +13,17 @@ DUMP = -DDUMP_RESULT
 
 all: $(TARGET)
 
-sequential_nbody_brute_force: sequential_nbody_barnes_hut.o $(OBJS)
-	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
+define RULE_TEMPLATE
 
-sequential_nbody_barnes_hut: sequential_nbody_barnes_hut.o $(OBJS)
-	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
+$1: $1.o $(OBJS)
+	$(CC) $(VERBOSE) -o $$@ $$< $(OBJS) $(LDFLAGS)
 
-parallelfor_nbody_brute_force: parallelfor_nbody_brute_force.o $(OBJS)
-	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
-
-#nbody_barnes_hut: nbody_barnes_hut.o $(OBJS)
-#	$(CC) $(VERBOSE) -o $@ $< $(OBJS) $(LDFLAGS)
+endef
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< $(VERBOSE) $(DISPLAY) $(DUMP) -fopenmp
+	$(CC) $(CFLAGS) -c  $< $(VERBOSE) $(DISPLAY) $(DUMP) 
+
 clean:
 	rm -f *.o $(TARGET)
+
+$(foreach tgt,$(TARGET),$(eval $(call RULE_TEMPLATE,$(tgt))))
