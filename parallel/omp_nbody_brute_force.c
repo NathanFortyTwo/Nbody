@@ -1,6 +1,6 @@
 /*
 ** nbody_brute_force.c - nbody simulation using the brute-force algorithm (O(n*n))
-**
+** OMP version
 **/
 
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <unistd.h>
+#include <omp.h>
 
 #ifdef DISPLAY
 #include <X11/Xlib.h>
@@ -19,13 +20,12 @@
 #include "ui.h"
 #include "nbody.h"
 #include "nbody_tools.h"
-// #include <mpi.h>
-#include <omp.h>
-FILE *f_out = NULL;
+
+FILE* f_out = NULL;
 
 int nparticles = 10; /* number of particles */
 float T_FINAL = 1.0; /* simulation end time */
-particle_t *particles;
+particle_t* particles;
 
 double sum_speed_sq = 0;
 double max_acc = 0;
@@ -37,7 +37,7 @@ void init()
 }
 
 #ifdef DISPLAY
-extern Display *theDisplay; /* These three variables are required to open the */
+extern Display* theDisplay; /* These three variables are required to open the */
 extern GC theGC;            /* particle plotting window.  They are externally */
 extern Window theMain;      /* declared in ui.h but are also required here.   */
 #endif
@@ -45,7 +45,7 @@ extern Window theMain;      /* declared in ui.h but are also required here.   */
 /* compute the force that a particle with position (x_pos, y_pos) and mass 'mass'
  * applies to particle p
  */
-void compute_force(particle_t *p, double x_pos, double y_pos, double mass)
+void compute_force(particle_t* p, double x_pos, double y_pos, double mass)
 {
   double x_sep, y_sep, dist_sq, grav_base;
 
@@ -61,7 +61,7 @@ void compute_force(particle_t *p, double x_pos, double y_pos, double mass)
 }
 
 /* compute the new position/velocity */
-void move_particle(particle_t *p, double step)
+void move_particle(particle_t* p, double step)
 {
 
   p->x_pos += (p->x_vel) * step;
@@ -92,7 +92,7 @@ void all_move_particles(double step)
 {
   /* First calculate force for particles. */
   int i;
-#pragma omp parallel for shared(particles)
+#pragma omp parallel for shared(particles) schedule(dynamic, 1)
   for (i = 0; i < nparticles; i++)
   {
     int j;
@@ -100,7 +100,7 @@ void all_move_particles(double step)
     particles[i].y_force = 0;
     for (j = 0; j < nparticles; j++)
     {
-      particle_t *p = &particles[j];
+      particle_t* p = &particles[j];
       /* compute the force of particle j on particle i */
       compute_force(&particles[i], p->x_pos, p->y_pos, p->mass);
     }
@@ -127,12 +127,12 @@ void draw_all_particles()
   }
 }
 
-void print_all_particles(FILE *f)
+void print_all_particles(FILE* f)
 {
   int i;
   for (i = 0; i < nparticles; i++)
   {
-    particle_t *p = &particles[i];
+    particle_t* p = &particles[i];
     fprintf(f, "particle={pos=(%f,%f), vel=(%f,%f)}\n", p->x_pos, p->y_pos, p->x_vel, p->y_vel);
   }
 }
@@ -165,7 +165,7 @@ void run_simulation()
 /*
   Simulate the movement of nparticles particles.
 */
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   if (argc >= 2)
   {
@@ -175,10 +175,6 @@ int main(int argc, char **argv)
   {
     T_FINAL = atof(argv[2]);
   }
-
-  // MPI_Init(&argc, &argv);
-  // int rank;
-  // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   init();
 
@@ -203,7 +199,7 @@ int main(int argc, char **argv)
   double duration = (t2.tv_sec - t1.tv_sec) + ((t2.tv_usec - t1.tv_usec) / 1e6);
 
 #ifdef DUMP_RESULT
-  FILE *f_out = fopen("particles.log", "w");
+  FILE* f_out = fopen("particles.log", "w");
   assert(f_out);
   print_all_particles(f_out);
   fclose(f_out);
