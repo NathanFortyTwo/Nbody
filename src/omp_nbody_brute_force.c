@@ -92,7 +92,7 @@ void all_move_particles(double step)
 {
   /* First calculate force for particles. */
   int i;
-#pragma omp parallel for shared(particles) schedule(dynamic, 1)
+#pragma omp parallel for shared(particles) schedule(static)
   for (i = 0; i < nparticles; i++)
   {
     int j;

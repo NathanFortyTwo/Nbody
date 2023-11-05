@@ -23,5 +23,6 @@ for file in log_files:
     plt.legend()
     plt.xlabel("Nombre de particules")
     plt.ylabel("Temps d'execution (s)")
-
-plt.savefig(dir+"/graph.png")
+    
+graph_name = "graphOMP"
+plt.savefig(dir+f"/{graph_name}.png")
